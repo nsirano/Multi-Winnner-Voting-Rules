@@ -1,11 +1,11 @@
 import sys
-from random import randrange
+from random import choice
 
 def usage():
     '''
     Prints usage notes for the program.
     '''
-    print("Usage: python gen_data.py <voters> <choices>")
+    print("Usage: python3 gen_data.py <voters> <choices>")
 
 def arg_check():
     '''
@@ -22,16 +22,20 @@ def generate_data(voters, choices):
     '''
     f = open("data.txt", "w")
     ranking = ""
+    exclude = set()
     v = 1
     for n in range(voters*choices):
-        ranking = ranking + str(chr(65 + int(randrange(choices))))
+        preference = int(choice([c for c in range(choices) if c not in exclude]))
+        ranking = ranking + str(chr(65 + preference))
         if n%choices == choices-1:
             ranking = ranking + "\n"
             f.write(ranking)
             ranking = ""
+            exclude.clear()
 
         else:
             ranking = ranking + ","
+            exclude.add(preference)
 
     f.close()
 
