@@ -23,7 +23,6 @@ def generate_data(num_choices, num_voters):
     f = open("data.txt", "w")
     ranking = ""
     exclude = set()
-    v = 1
     for n in range(num_choices*num_voters):
         preference = int(choice([c for c in range(num_choices) if c not in exclude]))
         ranking = ranking + str(chr(65 + preference))
