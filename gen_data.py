@@ -5,7 +5,7 @@ def usage():
     '''
     Prints usage notes for the program.
     '''
-    print("Usage: python3 gen_data.py <voters> <choices>")
+    print("Usage: python3 gen_data.py <num_choices> <num_voters>")
 
 def arg_check():
     '''
@@ -16,7 +16,7 @@ def arg_check():
         usage()
         sys.exit(1)
 
-def generate_data(voters, choices):
+def generate_data(num_choices, num_voters):
     '''
     Generates random preference profile data given the number of voters and choices.
     '''
@@ -24,10 +24,10 @@ def generate_data(voters, choices):
     ranking = ""
     exclude = set()
     v = 1
-    for n in range(voters*choices):
-        preference = int(choice([c for c in range(choices) if c not in exclude]))
+    for n in range(num_choices*num_voters):
+        preference = int(choice([c for c in range(num_choices) if c not in exclude]))
         ranking = ranking + str(chr(65 + preference))
-        if n%choices == choices-1:
+        if n%num_choices == num_choices-1:
             ranking = ranking + "\n"
             f.write(ranking)
             ranking = ""
@@ -44,9 +44,9 @@ def run():
     Main function to run the program.
     '''
     arg_check()
-    voters =  int(sys.argv[1])
-    choices = int(sys.argv[2])
-    generate_data(voters, choices)
+    num_choices =  int(sys.argv[1])
+    num_voters = int(sys.argv[2])
+    generate_data(num_choices, num_voters)
 
 # ============================================================================ #
 if __name__ == "__main__":
