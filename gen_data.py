@@ -2,24 +2,25 @@ import sys
 from random import choice
 
 def usage():
-    '''
+    """
     Prints usage notes for the program.
-    '''
+    """
     print("Usage: python3 gen_data.py <num_choices> <num_voters>")
 
 def arg_check():
-    '''
+    """
     Checks if enough arguments are passed to the function.
-    '''
+    """
     if len(sys.argv) < 3:
         print("Error: Not enough arguments.")
         usage()
         sys.exit(1)
 
 def generate_data(num_choices, num_voters):
-    '''
-    Generates random preference profile data given the number of voters and choices.
-    '''
+    """
+    Generates random preference profile data
+    given the number of voters and choices.
+    """
     f = open("data.txt", "w")
     ranking = ""
     exclude = set()
@@ -39,9 +40,9 @@ def generate_data(num_choices, num_voters):
     f.close()
 
 def run():
-    '''
+    """
     Main function to run the program.
-    '''
+    """
     arg_check()
     num_choices =  int(sys.argv[1])
     num_voters = int(sys.argv[2])
