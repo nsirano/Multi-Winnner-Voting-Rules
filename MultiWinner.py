@@ -26,6 +26,24 @@ class AssignmentFunction:
         copyAssignmentFunction = AssignmentFunction(copyAgentList, copyUnmatchedAltList)
         return copyAssignmentFunction
 
+def harmonic(n):
+    '''
+    Calculates the n-th number of the Harmonic Series.
+    '''
+    assert n >= 1, "Invalid number (%d) to calculate Harmonic Series."%n
+    return sum((1.0/k) for k in range(1,n+1))
+
+def algo_A(comm_size, num_candidates):
+    '''
+    - Each agent is, on average, represented by someone whom they prefer to
+      at least (1 - ((K-1)/(2*(m-1))) - (H_K/K)) fraction of the candidates,
+      where H_K is the K-th harmonic number.
+    - Each member of the committee represents roughly the same number of agents.
+    - Holds for every possible profile of (complete) preference orders.
+    - Approximates the Monroe rule.
+    '''
+    return 1 - ((comm_size)/(2*(num_candidates-1))) - (harmonic(comm_size)/comm_size)
+
 # working+
 def bordaSat(agentPrefList, altNameString):
     try:
