@@ -35,8 +35,11 @@ def harmonic(n):
 
 def algo_A(comm_size, num_candidates):
     '''
+    - Let K = comm_size
+    - Let m = num_candidates
+    - Let H_K be the K-th harmonic number.
     - Each agent is, on average, represented by someone whom they prefer to
-      at least (1 - ((K-1)/(2*(m-1))) - (H_K/K)) fraction of the candidates,
+      at least (1 - ((K-1)/(2*(m-1))) - (H_K/K)) fraction of the candidates.
       where H_K is the K-th harmonic number.
     - Each member of the committee represents roughly the same number of agents.
     - Holds for every possible profile of (complete) preference orders.
