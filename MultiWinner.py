@@ -74,26 +74,54 @@ def agentSort(agents, alt):
 
 
 def algoC_CC(K, alts, agents, d):
+	'''
+	Chamberlin Courant Multi-Winner Approximation Algorithm C
+		Algorithm C is a further heuristic improvement over Algorithm B. This time the idea is that instead of keeping only
+	one partial function Φ that is iteratively extended up to the full assignment, we keep a list of up to d partial assignment
+	functions, where d is a parameter of the algorithm. At each iteration, for each assignment function Φ among the d stored
+	ones and for each alternative a to which Φ has not assigned agents yet, we compute an optimal extension of this Φ that
+	assigns agents to a. As a result we obtain possibly more than d (partial) assignment functions. For the next iteration we
+	keep those d that give highest satisfaction.
+	'''
+	# list of partial assignments
     Par = []
+	# initial assignment function
     af0 = AssignmentFunction(agents, alts)
     Par.append(af0)
+	# Build the partial assignments up, iteratively adding 1 candidate at a time
     for i in range(K):
+		# create a new partial assignment
         newPar = []
+		# for each of the saved partial assignments in list Par
         for af in Par:
+			# attempt to place every alternative in committee seat 'i' for current partial assignment
             for alt in af.unmatchedAlts:
                 af_prime = copy.deepcopy(af) # this should be a deep copy
                 af_prime.unmatchedAlts.remove(alt)
+				# assign every agent that prefers this alterative as their assigned alternative
+				#   regardless of whether or not they have been previously assigned
                 for agent in af_prime.agents:
                     if (bordaSat(agent.prefs, alt) > bordaSat(agent.prefs, agent.alt)):
                         agent.alt = alt
                 newPar.append(af_prime)
+			# Sort list of partial assignments by total borda satisfaction
             newPar.sort(key=bordaTotalSat, reverse=True)
+		# Keep only the top 'd' partial assignments for use in the next iteration
         L = min(len(newPar), d)
         Par = newPar[:L]
 
     return Par
 
 def algoC_M(K, N, alts, agents, d):
+	'''
+	Monroe Multi-Winner Approximation Algorithm C
+		Algorithm C is a further heuristic improvement over Algorithm B. This time the idea is that instead of keeping only
+	one partial function Φ that is iteratively extended up to the full assignment, we keep a list of up to d partial assignment
+	functions, where d is a parameter of the algorithm. At each iteration, for each assignment function Φ among the d stored
+	ones and for each alternative a to which Φ has not assigned agents yet, we compute an optimal extension of this Φ that
+	assigns agents to a. As a result we obtain possibly more than d (partial) assignment functions. For the next iteration we
+	keep those d that give highest satisfaction.
+	'''
     Par = []
     af0 = AssignmentFunction(agents, alts)
     Par.append(af0)
