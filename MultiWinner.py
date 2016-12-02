@@ -2,6 +2,94 @@ import copy
 import operator
 import math
 
+
+class VoterAgent:
+	def __init__(self, idString="<unnamed>", prefAltList=[]):
+		self.id = id
+		self.prefs = prefAltList
+
+	def getID(self):
+		return self.id
+
+	def setID(self, idString):
+		self.id = idString
+
+	def getPrefs(self):
+		return self.prefs
+
+	def setPrefs(self, prefAltList):
+		self.prefs = prefAltList
+
+class CandidateAlternative:
+	def __init__(self, idString="<unnamed>"):
+		self.id = idString
+
+	def getID(self):
+		return self.id
+
+	def setID(self, idString):
+		self.id = idString
+
+class Assignment:
+	def __init__(self, candidateAlternative, voterAgentList=[]):
+		self.alt = candidateAlternative
+		self.agents = voterAgentList
+
+	def getAlt(self):
+		return self.alt
+
+	def setAlt(self, candidateAlternative):
+		self.alt = candidateAlternative
+
+	def getAgents(self):
+		return self.agents
+
+	def setAgents(self, voterAgentList):
+		self.agents = voterAgentList
+
+class AssignmentMap:
+	def __init__(self, assignmentList=[]):
+		self.assignments = assignmentList
+
+	def getAlternativeAssignment(self, candidateAlternativeIDString):
+		for a in self.assignments:
+			if (a.getAlt().getID() == candidateAlternativeIDString):
+				return a
+		return None
+
+	def getAgentAssignment(self, voterAgentIDString):
+		for a in self.assignments:
+			for v in a.getAgents():
+				if (v.getID() == voterAgentIDString):
+					return a
+		return None
+
+	def getAssignedAgents(self, candidateAlternativeIDString):
+		a = self.getAlternativeAssignment()
+		if (a != None):
+			return a.getAgents()
+		else:
+			return None
+
+	def getAssignedAlternative(self, voterAgentIDString):
+		a = self.getAgentAssignment()
+		if (a != None):
+			return a.getAlt()
+		else:
+			return None
+'''
+class AssignmentFunction:
+	def __init__(self, candidateAlternativeList=[], voterAgentList=[]):
+		self.alts = candidateAlternativeList
+		self.agents = voterAgentList
+
+
+	#ADD VOTING ALGORITHMS HERE
+
+'''
+
+#########################################################################################################
+
 class Agent:
     def __init__(self, nameString='<unnamed>', prefList=[], altNameString='none'):
         self.name = nameString
