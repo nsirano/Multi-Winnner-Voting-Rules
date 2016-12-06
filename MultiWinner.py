@@ -231,6 +231,9 @@ def bordaSat(agentPrefList, altNameString):
 # working+
 # Given a mapping, calculate the total societal satisfaction
 def bordaTotalSat(assignmentFunction):
+    """
+    Given a mapping, calculate the total societal satisfaction.
+    """
     totalSum = 0
     for agent in assignmentFunction.agents:
         totalSum += bordaSat(agent.prefs, agent.alt)
@@ -248,7 +251,7 @@ def agentSort(agents, alt):
     return sortedAgents
 
 def algoA(comm_size, alts, agents):
-	"""
+    """
     Algorithm A
     """
 
@@ -304,15 +307,19 @@ def algoA(comm_size, alts, agents):
 	return phi
 
 def algoC_CC(K, alts, agents, d):
-	'''
-	Chamberlin Courant Multi-Winner Approximation Algorithm C
-		Algorithm C is a further heuristic improvement over Algorithm B. This time the idea is that instead of keeping only
-	one partial function Φ that is iteratively extended up to the full assignment, we keep a list of up to d partial assignment
-	functions, where d is a parameter of the algorithm. At each iteration, for each assignment function Φ among the d stored
-	ones and for each alternative a to which Φ has not assigned agents yet, we compute an optimal extension of this Φ that
-	assigns agents to a. As a result we obtain possibly more than d (partial) assignment functions. For the next iteration we
-	keep those d that give highest satisfaction.
-	'''
+    """
+	Chamberlin Courant Multi-Winner Approximation Algorithm C:
+
+    Algorithm C is a further heuristic improvement over Algorithm B. This time
+    the idea is that instead of keeping only one partial function 'phi' that is
+    iteratively extended up to the full assignment, we keep a list of up to d
+    partial assignment functions, where 'd' is a parameter of the algorithm. At
+    each iteration, for each assignment function 'phi' among the 'd' stored ones
+    and for each alternative a to which 'phi' has not assigned agents yet, we
+    compute an optimal extension of this 'phi' that assigns agents to 'a'. As a
+    result we obtain possibly more than 'd' (partial) assignment functions. For
+    the next iteration we keep those d that give highest satisfaction.
+	"""
 	# list of partial assignments
     Par = []
 	# initial assignment function
@@ -336,22 +343,26 @@ def algoC_CC(K, alts, agents, d):
                 newPar.append(af_prime)
 			# Sort list of partial assignments by total borda satisfaction
             newPar.sort(key=bordaTotalSat, reverse=True)
-		# Keep only the top 'd' partial assignments for use in the next iteration
+        # Keep only the top 'd' partial assignments for use in the next iteration
         L = min(len(newPar), d)
         Par = newPar[:L]
 
     return Par
 
 def algoC_M(K, N, alts, agents, d):
-	'''
-	Monroe Multi-Winner Approximation Algorithm C
-		Algorithm C is a further heuristic improvement over Algorithm B. This time the idea is that instead of keeping only
-	one partial function Φ that is iteratively extended up to the full assignment, we keep a list of up to d partial assignment
-	functions, where d is a parameter of the algorithm. At each iteration, for each assignment function Φ among the d stored
-	ones and for each alternative a to which Φ has not assigned agents yet, we compute an optimal extension of this Φ that
-	assigns agents to a. As a result we obtain possibly more than d (partial) assignment functions. For the next iteration we
-	keep those d that give highest satisfaction.
-	'''
+    """
+	Monroe Multi-Winner Approximation Algorithm C:
+
+	Algorithm C is a further heuristic improvement over Algorithm B. This time
+    the idea is that instead of keeping only one partial function 'phi' that is
+    iteratively extended up to the full assignment, we keep a list of up to 'd'
+    partial assignment functions, where 'd' is a parameter of the algorithm. At
+    each iteration, for each assignment function 'phi' among the 'd' stored ones
+    and for each alternative a to which 'phi' has not assigned agents yet, we
+    compute an optimal extension of this 'phi' that assigns agents to 'a'. As a
+    result we obtain possibly more than 'd' (partial) assignment functions. For
+    the next iteration we keep those 'd' that give highest satisfaction.
+    """
 	# list of partial assignments
     Par = []
 	# initial assignment function
