@@ -1,3 +1,8 @@
+import copy
+import math
+import operator
+import sys
+
 class VoterAgent:
     def __init__(self, idString="<unnamed>", prefAltList=[]):
         self.id = idString
@@ -28,7 +33,6 @@ class VoterAgent:
         else:
             return None
 
-
 class CandidateAlternative:
     def __init__(self, idString="<unnamed>"):
         self.id = idString
@@ -55,7 +59,6 @@ class Assignment:
 
     def setAgents(self, voterAgentList):
         self.agents = voterAgentList
-
 
 class AssignmentMap:
     def __init__(self, assignmentList=[]):
@@ -254,57 +257,55 @@ def algoA(comm_size, alts, agents):
     """
     Algorithm A
     """
+    if comm_size <= 2:
+        return
 
-	if comm_size <= 2:
-		return
+    num_assigned = len(agents)/comm_size
+    print(num_assigned, "num_assigned")
 
-	num_assigned = len(agents)/comm_size
-	print(num_assigned, "num_assigned")
+    phi = dict()
 
-	phi = dict()
+    alts_left = alts
+    agents_left = agents
 
-	alts_left = alts
-	agents_left = agents
+    # For each committee member
+    for i in range(1, comm_size + 1):
+        score = dict()
+        bests = dict()
 
-	# For each committee member
-	for i in range(1, comm_size + 1):
-		score = dict()
-		bests = dict()
+        # For each alternative
+        alt_bests = []
+        for alt in alts_left:
+            # sort the agents by ranking of given alt, most preferred first
+            agents_left = sorted(agents_left, key=lambda agent: agent.prefs.index(alt))
+            for a in agents_left: print(a.name, a.prefs)
+            print
+            # add the first n/K agents to the best fit for the given alternative
+            alt_bests = []
+            for n in range(int(num_assigned)):
+                if agents_left:
+                    alt_bests.append(agents_left.pop(0))
+                    print(alt_bests[n].name)
 
-		# For each alternative
-		alt_bests = []
-		for alt in alts_left:
-			# sort the agents by ranking of given alt, most preferred first
-			agents_left = sorted(agents_left, key=lambda agent: agent.prefs.index(alt))
-			for a in agents_left: print(a.name, a.prefs)
-			print
-			# add the first n/K agents to the best fit for the given alternative
-			alt_bests = []
-			for n in range(int(num_assigned)):
-				if agents_left:
-					alt_bests.append(agents_left.pop(0))
+            bests[alt] = alt_bests
 
-					print(alt_bests[n].name)
+            # add the borda score for each alternative relative to each agent
+            score[alt] = 0
+            for j in alt_bests:
+                score[alt] += len(alts) - j.prefs.index(alt)
 
-			bests[alt] = alt_bests
+        alt_best = max(score.iteritems(), key=operator.itemgetter(1))[0]
+        print(i, alt_best)
+        print(bests[alt_best])
+        for j in bests[alt_best]:
+            print(j.name, alt_best)
+            phi[j.name] = alt_best
 
-			# add the borda score for each alternative relative to each agent
-			score[alt] = 0
-			for j in alt_bests:
-				score[alt] += len(alts) - j.prefs.index(alt)
+        print(i)
+        print(alts_left, alt_best)
+        alts_left.remove(alt_best)
 
-		alt_best = max(score.iteritems(), key=operator.itemgetter(1))[0]
-		print(i, alt_best)
-		print(bests[alt_best])
-		for j in bests[alt_best]:
-			print(j.name, alt_best)
-			phi[j.name] = alt_best
-
-		print(i)
-		print(alts_left, alt_best)
-		alts_left.remove(alt_best)
-
-	return phi
+    return phi
 
 def algoC_CC(K, alts, agents, d):
     """
@@ -404,22 +405,22 @@ def run():
     Main function to run the program.
     """
     agents = []
-	alternatives = []
+    alternatives = []
 
-	# Reads voter data from file
-	if len(sys.argv) > 1:
-		agents, alternatives = parse_data(sys.argv[1], agents, alternatives)
-		print([a.name for a in agents])
-		print(alternatives)
+    # Reads voter data from file
+    if len(sys.argv) > 1:
+        agents, alternatives = parse_data(sys.argv[1], agents, alternatives)
+        print([a.name for a in agents])
+        print(alternatives)
 
     # else runs with the following test data
     else:
         a1 = Agent('Agent 1', ['a', 'b', 'c', 'd'])
-		a2 = Agent('Agent 2', ['a', 'c', 'b', 'd'])
-		a3 = Agent('Agent 3', ['a', 'd', 'c', 'b'])
-		a4 = Agent('Agent 4', ['a', 'b', 'd', 'c'])
-		a5 = Agent('Agent 5', ['b', 'c', 'a', 'd'])
-		a6 = Agent('Agent 6', ['c', 'd', 'b', 'a'])
+        a2 = Agent('Agent 2', ['a', 'c', 'b', 'd'])
+        a3 = Agent('Agent 3', ['a', 'd', 'c', 'b'])
+        a4 = Agent('Agent 4', ['a', 'b', 'd', 'c'])
+        a5 = Agent('Agent 5', ['b', 'c', 'a', 'd'])
+        a6 = Agent('Agent 6', ['c', 'd', 'b', 'a'])
 
         alternatives = ['a', 'b', 'c', 'd']
 
