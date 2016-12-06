@@ -219,20 +219,6 @@ def harmonic(n):
     assert n >= 1, "Invalid number (%d) to calculate Harmonic Series."%n
     return sum((1.0/k) for k in range(1,n+1))
 
-def algo_A(comm_size, num_candidates):
-    '''
-    - Let K = comm_size
-    - Let m = num_candidates
-    - Let H_K be the K-th harmonic number.
-    - Each agent is, on average, represented by someone whom they prefer to
-      at least (1 - ((K-1)/(2*(m-1))) - (H_K/K)) fraction of the candidates.
-      where H_K is the K-th harmonic number.
-    - Each member of the committee represents roughly the same number of agents.
-    - Holds for every possible profile of (complete) preference orders.
-    - Approximates the Monroe rule.
-    '''
-    return 1 - ((comm_size)/(2*(num_candidates-1))) - (harmonic(comm_size)/comm_size)
-
 # working+
 def bordaSat(agentPrefList, altNameString):
     try:
@@ -261,6 +247,61 @@ def agentSort(agents, alt):
         sortedAgents.append(a[0])
     return sortedAgents
 
+def algoA(comm_size, alts, agents):
+	"""
+    Algorithm A
+    """
+
+	if comm_size <= 2:
+		return
+
+	num_assigned = len(agents)/comm_size
+	print(num_assigned, "num_assigned")
+
+	phi = dict()
+
+	alts_left = alts
+	agents_left = agents
+
+	# For each committee member
+	for i in range(1, comm_size + 1):
+		score = dict()
+		bests = dict()
+
+		# For each alternative
+		alt_bests = []
+		for alt in alts_left:
+			# sort the agents by ranking of given alt, most preferred first
+			agents_left = sorted(agents_left, key=lambda agent: agent.prefs.index(alt))
+			for a in agents_left: print(a.name, a.prefs)
+			print
+			# add the first n/K agents to the best fit for the given alternative
+			alt_bests = []
+			for n in range(int(num_assigned)):
+				if agents_left:
+					alt_bests.append(agents_left.pop(0))
+
+					print(alt_bests[n].name)
+
+			bests[alt] = alt_bests
+
+			# add the borda score for each alternative relative to each agent
+			score[alt] = 0
+			for j in alt_bests:
+				score[alt] += len(alts) - j.prefs.index(alt)
+
+		alt_best = max(score.iteritems(), key=operator.itemgetter(1))[0]
+		print(i, alt_best)
+		print(bests[alt_best])
+		for j in bests[alt_best]:
+			print(j.name, alt_best)
+			phi[j.name] = alt_best
+
+		print(i)
+		print(alts_left, alt_best)
+		alts_left.remove(alt_best)
+
+	return phi
 
 def algoC_CC(K, alts, agents, d):
 	'''
