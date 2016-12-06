@@ -351,31 +351,46 @@ def run():
     """
     Main function to run the program.
     """
-    a1 = Agent('1', ['a', 'b', 'c', 'd'])
-    a2 = Agent('2', ['b', 'a', 'c', 'd'])
-    a3 = Agent('3', ['b', 'c', 'a', 'd'])
-    a4 = Agent('4', ['a', 'd', 'c', 'b'])
-    a5 = Agent('5', ['a', 'b', 'c', 'd'])
-    a6 = Agent('6', ['c', 'b', 'a', 'd'])
+    agents = []
+	alternatives = []
+
+	# Reads voter data from file
+	if len(sys.argv) > 1:
+		agents, alternatives = parse_data(sys.argv[1], agents, alternatives)
+		print([a.name for a in agents])
+		print(alternatives)
+
+    # else runs with the following test data
+    else:
+        a1 = Agent('Agent 1', ['a', 'b', 'c', 'd'])
+		a2 = Agent('Agent 2', ['a', 'c', 'b', 'd'])
+		a3 = Agent('Agent 3', ['a', 'd', 'c', 'b'])
+		a4 = Agent('Agent 4', ['a', 'b', 'd', 'c'])
+		a5 = Agent('Agent 5', ['b', 'c', 'a', 'd'])
+		a6 = Agent('Agent 6', ['c', 'd', 'b', 'a'])
+
+        alternatives = ['a', 'b', 'c', 'd']
 
     af0 = AssignmentFunction([a1,a2,a3,a4,a5])
     #print(len(af0.agents))
     #print(len(af0.unmatchedAlts))
     #print(bordaTotalSat(af0))
 
-    parCC = algoC_CC(2, ['a', 'b', 'c', 'd'], [a1, a2, a3, a4, a5], 10)
+
+
+    #parCC = algoC_CC(2, ['a', 'b', 'c', 'd'], [a1, a2, a3, a4, a5], 10)
     #print(len(parCC))
 
-    parM = algoC_M(3, 6, ['a', 'b', 'c', 'd'], [a1, a2, a3, a4, a5, a6], 4)
+    #parM = algoC_M(3, 6, ['a', 'b', 'c', 'd'], [a1, a2, a3, a4, a5, a6], 4)
     #print(len(parM))
 
-    par = parM
-    for i in range(len(par)):
-        for agent in par[i].agents:
-            print(agent.name, ':', agent.alt)
-        print(par[i].unmatchedAlts)
-        print(bordaTotalSat(par[i]))
-        print('-------------')
+    #par = parM
+    #for i in range(len(par)):
+        #for agent in par[i].agents:
+            #print(agent.name, ':', agent.alt)
+        #print(par[i].unmatchedAlts)
+        #print(bordaTotalSat(par[i]))
+        #print('-------------')
 
 # ============================================================================ #
 if __name__ == "__main__":
