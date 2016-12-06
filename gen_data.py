@@ -27,7 +27,7 @@ def generate_data(num_choices, num_voters):
     for n in range(num_choices*num_voters):
         preference = int(choice( [c for c in range(num_choices)
                                         if c not in exclude] ))
-        ranking = ranking + str(chr(65 + preference))
+        ranking = ranking + str(chr(97 + preference))
         if n%num_choices == num_choices-1:
             ranking = ranking + "\n"
             f.write(ranking)
