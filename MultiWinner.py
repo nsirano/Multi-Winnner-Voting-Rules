@@ -1,92 +1,190 @@
-import copy
-import operator
-import math
-
-
 class VoterAgent:
-	def __init__(self, idString="<unnamed>", prefAltList=[]):
-		self.id = id
-		self.prefs = prefAltList
+    def __init__(self, idString="<unnamed>", prefAltList=[]):
+        self.id = idString
+        self.prefs = prefAltList
 
-	def getID(self):
-		return self.id
+    def getID(self):
+        return self.id
 
-	def setID(self, idString):
-		self.id = idString
+    def setID(self, idString):
+        self.id = idString
 
-	def getPrefs(self):
-		return self.prefs
+    def getPrefs(self):
+        return self.prefs
 
-	def setPrefs(self, prefAltList):
-		self.prefs = prefAltList
+    def setPrefs(self, prefAltList):
+        self.prefs = prefAltList
+
+    def getSat(self, satRule="Borda", candidateAlternativeIDString="<unnamed>"):
+        if (satRule == "Borda"):
+            n = len(self.prefs)
+            for i in range(n):
+                if (candidateAlternativeIDString == self.prefs[i]):
+                # Note: This borda method leaves the last ranked candidate with a score of 1
+                #  this way, unmentioned candidates on truncated ballots have score of 0.
+                    return (n - i)
+            return 0
+
+        else:
+            return None
+
 
 class CandidateAlternative:
-	def __init__(self, idString="<unnamed>"):
-		self.id = idString
+    def __init__(self, idString="<unnamed>"):
+        self.id = idString
 
-	def getID(self):
-		return self.id
+    def getID(self):
+        return self.id
 
-	def setID(self, idString):
-		self.id = idString
+    def setID(self, idString):
+        self.id = idString
 
 class Assignment:
-	def __init__(self, candidateAlternative, voterAgentList=[]):
-		self.alt = candidateAlternative
-		self.agents = voterAgentList
+    def __init__(self, candidateAlternative=None, voterAgentList=[]):
+        self.alt = candidateAlternative
+        self.agents = voterAgentList
 
-	def getAlt(self):
-		return self.alt
+    def getAlt(self):
+        return self.alt
 
-	def setAlt(self, candidateAlternative):
-		self.alt = candidateAlternative
+    def setAlt(self, candidateAlternative):
+        self.alt = candidateAlternative
 
-	def getAgents(self):
-		return self.agents
+    def getAgents(self):
+        return self.agents
 
-	def setAgents(self, voterAgentList):
-		self.agents = voterAgentList
+    def setAgents(self, voterAgentList):
+        self.agents = voterAgentList
+
 
 class AssignmentMap:
-	def __init__(self, assignmentList=[]):
-		self.assignments = assignmentList
+    def __init__(self, assignmentList=[]):
+        self.assignments = assignmentList
 
-	def getAlternativeAssignment(self, candidateAlternativeIDString):
-		for a in self.assignments:
-			if (a.getAlt().getID() == candidateAlternativeIDString):
-				return a
-		return None
+    def getAssignments(self):
+        return self.assignments
 
-	def getAgentAssignment(self, voterAgentIDString):
-		for a in self.assignments:
-			for v in a.getAgents():
-				if (v.getID() == voterAgentIDString):
-					return a
-		return None
+    def getAlternativeAssignment(self, candidateAlternativeIDString):
+        for a in self.assignments:
+            if (a.getAlt().getID() == candidateAlternativeIDString):
+                return a
+        return None
 
-	def getAssignedAgents(self, candidateAlternativeIDString):
-		a = self.getAlternativeAssignment()
-		if (a != None):
-			return a.getAgents()
-		else:
-			return None
+    def getAgentAssignment(self, voterAgentIDString):
+        for a in self.assignments:
+            for v in a.getAgents():
+                if (v.getID() == voterAgentIDString):
+                    return a
+        return None
 
-	def getAssignedAlternative(self, voterAgentIDString):
-		a = self.getAgentAssignment()
-		if (a != None):
-			return a.getAlt()
-		else:
-			return None
-'''
+    def getAssignedAgents(self, candidateAlternativeIDString):
+        a = self.getAlternativeAssignment(candidateAlternativeIDString)
+        if (a != None):
+            return a.getAgents()
+        else:
+            return None
+
+    def getAssignedAlternative(self, voterAgentIDString):
+        a = self.getAgentAssignment(voterAgentIDString)
+        if (a != None):
+            return a.getAlt()
+        else:
+            return None
+
+    def getTotalSat(self, satRule="Borda"):
+        if (satRule == "Borda"):
+            totalSat = 0
+            for a in self.assignments:
+                for v in a.getAgents():
+                    totalSat += v.getSat("Borda", a.getAlt().getID())
+            return totalSat
+        else:
+            return -1
+
 class AssignmentFunction:
-	def __init__(self, candidateAlternativeList=[], voterAgentList=[]):
-		self.alts = candidateAlternativeList
-		self.agents = voterAgentList
+    def __init__(self, candidateAlternativeList=[], voterAgentList=[]):
+        self.alts = candidateAlternativeList
+        self.agents = voterAgentList
+
+    #def getSortedAgentsByPref():
+        # should this sort the original agent list or create a new one??
+        #  create a copy and sort that; maintain integrity of original
+        agents = copy.deepcopy(self.agents)
 
 
-	#ADD VOTING ALGORITHMS HERE
+    #ADD VOTING ALGORITHMS HERE
 
-'''
+#####################################################################################
+
+# VoterAgent Class Testing
+
+v1 = VoterAgent()
+print(v1.getID())
+print(v1.getPrefs())
+
+v1.setID("Paul")
+print(v1.getID())
+
+v1.setPrefs(['c1', 'c2', 'c3'])
+print(v1.getPrefs())
+print(v1.getSat('Borda', 'c1'))
+print(v1.getSat('Borda', 'c3'))
+print(v1.getSat('Borda', 'c4'))
+
+# Candidate Class Testing
+
+c1 = CandidateAlternative()
+print(c1.getID())
+
+c1.setID("Bob")
+print(c1.getID())
+
+# Assignment Class Testing
+
+a1 = Assignment()
+print(a1.getAlt())
+print(a1.getAgents())
+
+c1 = CandidateAlternative("Wally Dingmann")
+a1.setAlt(c1)
+print(a1.getAlt().getID())
+
+v1 = VoterAgent("v1", ['c1','c2','c3'])
+v2 = VoterAgent("v2", ['c1','c2','c3'])
+v3 = VoterAgent("v3", ['c1','c2','c3'])
+av1 = [v1,v2,v3]
+
+a1.setAgents(av1)
+for v in a1.getAgents():
+    print(v.getID(), ' ', v.getPrefs())
+
+	# AssignmentMap Class Testing
+
+am1 = AssignmentMap()
+print(am1.getAssignments())
+
+c1 = CandidateAlternative("c1")
+c2 = CandidateAlternative("c2")
+c3 = CandidateAlternative("c3")
+
+v1 = VoterAgent("v1", ['c1','c2','c3'])
+v2 = VoterAgent("v2", ['c1','c2','c3'])
+v3 = VoterAgent("v3", ['c2','c3','c1'])
+v4 = VoterAgent("v4", ['c2','c3','c1'])
+v5 = VoterAgent("v5", ['c3','c1','c2'])
+v6 = VoterAgent("v6", ['c3','c1','c2'])
+
+a1 = Assignment(c1, [v1,v2])
+a2 = Assignment(c2, [v3,v4])
+a3 = Assignment(c3, [v5,v6])
+
+am1 = AssignmentMap([a1,a2,a3])
+print(len(am1.getAssignments()))
+print(am1.getAlternativeAssignment('c1').getAlt().getID())
+print(am1.getAgentAssignment('v3').getAlt().getID())
+print(len(am1.getAssignedAgents('c3')))
+print(am1.getAssignedAlternative('v6').getID())
+print("Total Satisfaction: ", am1.getTotalSat("Borda"))
 
 #########################################################################################################
 
