@@ -117,7 +117,7 @@ class AssignmentFunction:
 #####################################################################################
 
 # VoterAgent Class Testing
-
+"""
 v1 = VoterAgent()
 print(v1.getID())
 print(v1.getPrefs())
@@ -185,7 +185,7 @@ print(am1.getAgentAssignment('v3').getAlt().getID())
 print(len(am1.getAssignedAgents('c3')))
 print(am1.getAssignedAlternative('v6').getID())
 print("Total Satisfaction: ", am1.getTotalSat("Borda"))
-
+"""
 #########################################################################################################
 
 class Agent:
@@ -213,9 +213,9 @@ class AssignmentFunction:
         return copyAssignmentFunction
 
 def harmonic(n):
-    '''
+    """
     Calculates the n-th number of the Harmonic Series.
-    '''
+    """
     assert n >= 1, "Invalid number (%d) to calculate Harmonic Series."%n
     return sum((1.0/k) for k in range(1,n+1))
 
