@@ -347,28 +347,36 @@ def algoC_M(K, N, alts, agents, d):
         Par = newPar[:L]
     return Par
 
-a1 = Agent('1', ['a', 'b', 'c', 'd'])
-a2 = Agent('2', ['b', 'a', 'c', 'd'])
-a3 = Agent('3', ['b', 'c', 'a', 'd'])
-a4 = Agent('4', ['a', 'd', 'c', 'b'])
-a5 = Agent('5', ['a', 'b', 'c', 'd'])
-a6 = Agent('6', ['c', 'b', 'a', 'd'])
+def run():
+    """
+    Main function to run the program.
+    """
+    a1 = Agent('1', ['a', 'b', 'c', 'd'])
+    a2 = Agent('2', ['b', 'a', 'c', 'd'])
+    a3 = Agent('3', ['b', 'c', 'a', 'd'])
+    a4 = Agent('4', ['a', 'd', 'c', 'b'])
+    a5 = Agent('5', ['a', 'b', 'c', 'd'])
+    a6 = Agent('6', ['c', 'b', 'a', 'd'])
 
-af0 = AssignmentFunction([a1,a2,a3,a4,a5])
-#print(len(af0.agents))
-#print(len(af0.unmatchedAlts))
-#print(bordaTotalSat(af0))
+    af0 = AssignmentFunction([a1,a2,a3,a4,a5])
+    #print(len(af0.agents))
+    #print(len(af0.unmatchedAlts))
+    #print(bordaTotalSat(af0))
 
-parCC = algoC_CC(2, ['a', 'b', 'c', 'd'], [a1, a2, a3, a4, a5], 10)
-#print(len(parCC))
+    parCC = algoC_CC(2, ['a', 'b', 'c', 'd'], [a1, a2, a3, a4, a5], 10)
+    #print(len(parCC))
 
-parM = algoC_M(3, 6, ['a', 'b', 'c', 'd'], [a1, a2, a3, a4, a5, a6], 4)
-#print(len(parM))
+    parM = algoC_M(3, 6, ['a', 'b', 'c', 'd'], [a1, a2, a3, a4, a5, a6], 4)
+    #print(len(parM))
 
-par = parM
-for i in range(len(par)):
-    for agent in par[i].agents:
-        print(agent.name, ':', agent.alt)
-    print(par[i].unmatchedAlts)
-    print(bordaTotalSat(par[i]))
-    print('-------------')
+    par = parM
+    for i in range(len(par)):
+        for agent in par[i].agents:
+            print(agent.name, ':', agent.alt)
+        print(par[i].unmatchedAlts)
+        print(bordaTotalSat(par[i]))
+        print('-------------')
+
+# ============================================================================ #
+if __name__ == "__main__":
+	run()
