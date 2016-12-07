@@ -400,6 +400,22 @@ def algoC_M(K, N, alts, agents, d):
         Par = newPar[:L]
     return Par
 
+def parse_data(filename, agents=[], alternatives=[]):
+    """
+    Parses voter data from input file.
+    """
+    count = 1
+    f = open(sys.argv[1], "r")
+    for line in f:
+        line = line.rstrip().split(',')
+        if count == 1:
+            alternatives = sorted(line)
+
+        agents.append(Agent("Agent %d"%(count), line))
+        count += 1
+
+    return agents, alternatives
+
 def run():
     """
     Main function to run the program.
@@ -424,7 +440,7 @@ def run():
 
         alternatives = ['a', 'b', 'c', 'd']
 
-    af0 = AssignmentFunction([a1,a2,a3,a4,a5])
+    af0 = AssignmentFunction(agents)
     #print(len(af0.agents))
     #print(len(af0.unmatchedAlts))
     #print(bordaTotalSat(af0))
