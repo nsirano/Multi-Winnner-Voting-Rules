@@ -3,8 +3,67 @@ import math
 import operator
 import sys
 
+from preference import Preference
+
 import pprint
 pp = pprint.PrettyPrinter(indent=4).pprint
+
+def usage():
+    """
+    Prints usage information.
+    """
+    print("python MultiWinner.py <data.txt>")
+
+def check_arguments():
+    """
+    Checks to see if enough arguments are passed to MultiWinner.py.
+    """
+    if len(sys.argv) < 2:
+        print("ERROR: Not enough arguments.")
+        usage()
+        sys.exit(1)
+
+def sign(n):
+    """
+    Checks the sign of a number.
+    Returns  1 if positive.
+    Returns -1 if negative.
+    """
+    return int(n > 0) - int(n < 0)
+
+def create_wmgMap(ranking):
+    """
+    Create a weighted majority graph mapping from a voter's preference rankings.
+    """
+
+    alternatives = sorted(ranking)
+
+    wmgMap = dict()
+    for a in range(len(alternatives)):
+        wmgMap[a] = dict()
+        for alt in range(len(alternatives)):
+            if alt != a:
+                alt_index = ranking.index(alternatives[alt])
+                a_index   = ranking.index(alternatives[a])
+                wmgMap[a][alt] = sign(alt_index - a_index)
+
+    return wmgMap
+
+def parse_data(filename, agents=[], alternatives=[]):
+    """
+    Parses voter data from input file.
+    """
+    f = open(sys.argv[1], "r")
+    for line in f:
+        ranking = line.rstrip().split(',')
+        if len(ranking) > len(alternatives):
+            alternatives = sorted(ranking)
+
+        wmgMap = create_wmgMap(ranking)
+
+        agents.append(Preference(wmgMap))
+
+    return agents, alternatives
 
 def betzler1():
     pass
@@ -164,26 +223,11 @@ def algoC_M(K, N, alts, agents, d):
         Par = newPar[:L]
     return Par
 
-def parse_data(filename, agents=[], alternatives=[]):
-    """
-    Parses voter data from input file.
-    """
-    count = 1
-    f = open(sys.argv[1], "r")
-    for line in f:
-        line = line.rstrip().split(',')
-        if count == 1:
-            alternatives = sorted(line)
-
-        agents.append(Agent("Agent %d"%(count), line))
-        count += 1
-
-    return agents, alternatives
-
 def run():
     """
     Main function to run the program.
     """
+    check_arguments()
 
     agents, alternatives = parse_data(sys.argv[1])
 
