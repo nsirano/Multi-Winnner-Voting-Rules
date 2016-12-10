@@ -8,6 +8,16 @@ from preference import Preference
 import pprint
 pp = pprint.PrettyPrinter(indent=4).pprint
 
+class SingleAssignment:
+    def __init__(self, prefObj, altID='<none>'):
+        self.pref = prefObj
+        self.alt = altID
+
+class FullAssignment:
+     def __init__(self, assignmentObjList=[], unmatchedAltList=[]):
+        self.assignments = assignmentObjList
+        self.unmatchedAlts = unmatchedAltList
+
 def usage():
     """
     Prints usage information.
@@ -35,9 +45,7 @@ def create_wmgMap(ranking):
     """
     Create a weighted majority graph mapping from a voter's preference rankings.
     """
-
     alternatives = sorted(ranking)
-
     wmgMap = dict()
     for a in range(len(alternatives)):
         wmgMap[a] = dict()
