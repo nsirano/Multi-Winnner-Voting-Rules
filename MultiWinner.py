@@ -44,11 +44,19 @@ def sign(n):
 def create_wmgMap(ranking):
     """
     Create a weighted majority graph mapping from a voter's preference rankings.
+    Each wmgMap is a dictionary of candidates that each maps to another
+    dictionary of candidates, excluding the first candidate. The second
+    dictionary then maps to '1' if the first candidate is ranked higher than the
+    second and maps to '-1' if the first candidate is ranked lower.
     """
-    alternatives = sorted(ranking)
     wmgMap = dict()
+    alternatives = sorted(ranking)
+
+    # For each alternative as the first candidate,
     for a in range(len(alternatives)):
         wmgMap[a] = dict()
+
+        # For each alternative that is not the first candidate
         for alt in range(len(alternatives)):
             if alt != a:
                 alt_index = ranking.index(alternatives[alt])
@@ -68,7 +76,6 @@ def parse_data(filename, agents=[], alternatives=[]):
             alternatives = sorted(ranking)
 
         wmgMap = create_wmgMap(ranking)
-
         agents.append(Preference(wmgMap))
 
     return agents, alternatives
