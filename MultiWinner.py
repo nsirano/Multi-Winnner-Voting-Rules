@@ -6,6 +6,22 @@ import sys
 import pprint
 pp = pprint.PrettyPrinter(indent=4).pprint
 
+##############################################################################
+'''This is just what I am using so far for a class storage objects.
+	Pretty much a copy of Voter and AssignmentFunction Classes
+ (Parker 12/10)'''
+class SingleAssignment:
+    def __init__(self, prefObj, altID='<none>'):
+        self.pref = prefObj
+        self.alt = altID
+
+class FullAssignment:
+     def __init__(self, assignmentObjList=[], unmatchedAltList=[]):
+        self.assignments = assignmentObjList
+        self.unmatchedAlts = unmatchedAltList
+
+#############################################################################
+''' All classes below will become obsolete. Parker 12/10 '''
 class VoterAgent:
     def __init__(self, idString="<unnamed>", prefAltList=[]):
         self.id = idString
