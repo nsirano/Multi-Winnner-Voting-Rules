@@ -3,6 +3,9 @@ import math
 import operator
 import sys
 
+import pprint
+pp = pprint.PrettyPrinter(indent=4).pprint
+
 class VoterAgent:
     def __init__(self, idString="<unnamed>", prefAltList=[]):
         self.id = idString
@@ -253,6 +256,9 @@ def agentSort(agents, alt):
         sortedAgents.append(a[0])
     return sortedAgents
 
+def betzler1():
+    pass
+
 def algoA(comm_size, alts, agents):
     """
     Algorithm A
@@ -278,9 +284,11 @@ def algoA(comm_size, alts, agents):
         for alt in alts_left:
             # sort the agents by ranking of given alt, most preferred first
             agents_left = sorted(agents_left, key=lambda agent: agent.prefs.index(alt))
-            for a in agents_left: print(a.name, a.prefs)
-            print
+
+            #for a in agents_left: print(a.name, a.prefs)
+            #print
             # add the first n/K agents to the best fit for the given alternative
+
             alt_bests = []
             for n in range(int(num_assigned)):
                 if agents_left:
@@ -445,7 +453,8 @@ def run():
     #print(len(af0.unmatchedAlts))
     #print(bordaTotalSat(af0))
 
-
+    parA = algoA(10, alternatives, agents)
+    pp(parA)
 
     #parCC = algoC_CC(2, ['a', 'b', 'c', 'd'], [a1, a2, a3, a4, a5], 10)
     #print(len(parCC))
