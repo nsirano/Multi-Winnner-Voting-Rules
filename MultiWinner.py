@@ -395,9 +395,7 @@ def run():
     else:
         comm_size = len(alternatives)
 
-    # For testing    def __init__(self, wmgMap, count = 1):
-        self.wmgMap = wmgMap
-        self.count = count
+    # For testing 
 
     print
     print("agent.getIncEdgesMap()")
