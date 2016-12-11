@@ -65,6 +65,30 @@ def create_wmgMap(ranking):
 
     return wmgMap
 
+def create_wmgMap2(ranking):
+    """
+    Create a weighted majority graph mapping from a voter's preference rankings.
+    Each wmgMap is a dictionary of candidates that each maps to another
+    dictionary of candidates, excluding the first candidate. The second
+    dictionary then maps to '1' if the first candidate is ranked higher than the
+    second and maps to '-1' if the first candidate is ranked lower.
+    """
+    wmgMap = dict()
+    alternatives = sorted(ranking) # ?: I don't think this is necessary that they are in alphbetical order?
+
+    # For each alternative as the first candidate,
+    for a in alternatives:
+        wmgMap[a] = dict()
+
+        # For each alternative that is not the first candidate
+        for alt in alternatives:
+            if alt != a:
+                alt_index = ranking.index(alt)
+                a_index   = ranking.index(a)
+                wmgMap[a][alt] = sign(alt_index - a_index)
+
+    return wmgMap
+
 def parse_data(filename, agents=[], alternatives=[]):
     """
     Parses voter data from input file.
