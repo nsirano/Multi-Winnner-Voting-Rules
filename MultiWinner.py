@@ -51,7 +51,7 @@ class FullAssignment:
 
         else:
             print('error: unknown scoring method')
-        
+
 
 def usage():
     """
@@ -333,6 +333,55 @@ def algoC_M(K, N, alts, agents, d):
         L = min(len(newPar), d)
         Par = newPar[:L]
     return Par
+
+def algoC_M2(comm_size, alts, agents, d):
+    # Store the number of voting agents
+    num_agents = len(agents)
+
+    # Store Preference objects (agents) in SingleAssignment objects
+    assignments = []
+    for a in agents:
+        assignments.append(SingleAssignment(a))
+
+    # List of partial assignments (i.e. incomplete committees)
+    paList = []
+    # Initial default partial assignment (none assigned)
+    pa0 = FullAssignment(assignments, alts)
+    paList.append(pa0)
+
+    # Iteratively build up partial assignments by adding 1 alternative at a time
+    for i in range(comm_size):
+        tmpList = []
+        # Extend every partial assignment to include 1 more alternative, trying every permutation
+        for pa in paList:
+            for alt in pa.unmatchedAlts:
+                extendedPA = copy.deepcopy(pa)
+                # Sort the single assignments (agents) by their preference for the current alternative
+                sortedAssignments = sorted(extendedPA.assignments, key=lambda a: a.pref.getRankMap()[alt])
+                extendedPA.assignments = sortedAssignments
+                # Assign the top (num_agents / comm_size) agents to the current alternative unless
+                #  they have been previously assigned
+                counter = 0
+                for a in extendedPA.assignments:
+                    if (a.alt == '<none>'):
+                        a.alt = alt
+                        counter += 1
+                    if (counter == math.ceil(num_agents / comm_size)):
+                        break
+
+                # The alternative has now been matched
+                extendedPA.unmatchedAlts.remove(alt)
+                # Save the new extended partial assignment
+                tmpList.append(extendedPA)
+
+        # Sort the partial assignments by total satisfaction score
+        tmpList = sorted(tmpList, key=lambda pa: pa.getSatScore(), reverse=True)
+        # Keep the top L partial assignments for use in the next iteration
+        L = min(len(tmpList), d)
+        paList = tmpList[:L]
+
+    return paList
+
 
 def run():
     """
