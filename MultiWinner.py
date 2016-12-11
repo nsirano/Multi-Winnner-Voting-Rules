@@ -22,7 +22,7 @@ def usage():
     """
     Prints usage information.
     """
-    print("python MultiWinner.py <data.txt>")
+    print("python MultiWinner.py <data.txt> <comm_size>")
 
 def check_arguments():
     """
@@ -245,6 +245,14 @@ def run():
     check_arguments()
 
     agents, alternatives = parse_data(sys.argv[1])
+
+    if len(sys.argv) > 2:
+        comm_size = sys.argv[2]
+
+    else:
+        comm_size = len(alternatives)
+
+    matchA = algoA(4, alternatives, agents)
 
 # ============================================================================ #
 if __name__ == "__main__":
