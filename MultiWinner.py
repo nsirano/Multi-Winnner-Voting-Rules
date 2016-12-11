@@ -8,15 +8,50 @@ from preference import Preference
 import pprint
 pp = pprint.PrettyPrinter(indent=4).pprint
 
+def bordaScore(pref, alt):
+    # Get alternative rankings from Preference object
+    rankMap = pref.getRankMap()
+    # Return the Borda Score if the alternative is recognized
+    #  (Last ranking borda score of 1)
+    try:
+        rank = rankMap[alt]
+        score = (len(rankMap) - (rank-1))
+        return score
+    # Return 0 otherwise, allowing for truncated ballots
+    except KeyError:
+        return 0
+
 class SingleAssignment:
     def __init__(self, prefObj, altID='<none>'):
         self.pref = prefObj
         self.alt = altID
 
+    def getSatScore(self, scoreType='borda'):
+        scoreType = scoreType.lower()
+
+        if (scoreType == 'borda'):
+            return bordaScore(self.pref, self.alt)
+
+        else:
+            print('error: unknown scoring method')
+
 class FullAssignment:
-     def __init__(self, assignmentObjList=[], unmatchedAltList=[]):
+    def __init__(self, assignmentObjList=[], unmatchedAltList=[]):
         self.assignments = assignmentObjList
         self.unmatchedAlts = unmatchedAltList
+
+    def getSatScore(self, scoreType='borda'):
+        scoreType = scoreType.lower()
+
+        if (scoreType == 'borda'):
+            totalScore = 0
+            for a in self.assignments:
+                totalScore += a.getSatScore(scoreType)
+            return totalScore
+
+        else:
+            print('error: unknown scoring method')
+        
 
 def usage():
     """
@@ -211,6 +246,43 @@ def algoC_CC(K, alts, agents, d):
         Par = newPar[:L]
 
     return Par
+
+def algoC_CC2(comm_size, alts, agents, d):
+    # Store Preference objects (agents) in SingleAssignment objects
+    assignments = []
+    for a in agents:
+        assignments.append(SingleAssignment(a))
+
+    # List of partial assignments (i.e. incomplete committees)
+    paList = []
+    # Initial default partial assignment (none assigned)
+    pa0 = FullAssignment(assignments, alts)
+    paList.append(pa0)
+
+    # Iteratively build up partial assignments by adding 1 alternative at a time
+    for i in range(comm_size):
+        tmpList = []
+        # Extend every partial assignment to include 1 more alternative, trying every permutation
+        for pa in paList:
+            for alt in pa.unmatchedAlts:
+                extendedPA = copy.deepcopy(pa)
+                # Assign every agent to the current alternative if preferred
+                #  regardles of previous assignments
+                for a in extendedPA.assignments:
+                    if (bordaSat(a.pref, alt) > bordaSat(a.pref, a.alt)):
+                        a.alt = alt
+                # The alternative has now been matched
+                extendedPA.unmatchedAlts.remove(alt)
+                # Save the new extended partial assignment
+                tmpList.append(extendedPA)
+        # Sort the partial assignments by total satisfaction score
+        tmpList = sorted(tmpList, key=lambda pa: pa.getSatScore(), reverse=True)
+        # Keep the top L partial assignments for use in the next iteration
+        L = min(len(tmpList), d)
+        paList = tmpList[:L]
+
+    return paList
+
 
 def algoC_M(K, N, alts, agents, d):
     """
