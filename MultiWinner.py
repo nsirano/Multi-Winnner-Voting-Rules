@@ -52,7 +52,6 @@ class FullAssignment:
         else:
             print('error: unknown scoring method')
 
-
 def usage():
     """
     Prints usage information.
@@ -137,23 +136,22 @@ def parse_data(filename, agents=[], alternatives=[]):
         wmgMap = create_wmgMap(ranking)
         agents.append(Preference(wmgMap))
 
+    pp(wmgMap)
     return agents, alternatives
-
-def betzler1():
-    pass
 
 def algoA(comm_size, alts, agents):
     """
     Algorithm A
     """
     if comm_size <= 2:
+        # Betzler
         return
 
     num_assigned = len(agents)/comm_size
     print(num_assigned, "num_assigned")
 
     alts_left = list(alts)
-    agents_left = list(agents)
+    agents_left = (a.getOrderVector() for a in agents)
 
     phi = dict()
 
@@ -167,7 +165,7 @@ def algoA(comm_size, alts, agents):
         for alt in alts_left:
             # Sort the agents by ranking of given alt, most preferred first
             agents_left = list(sorted(agents_left, key=lambda agent:
-                                                        agent.prefs.index(alt)))
+                                                        agent.index(alt)))
 
             print
             for a in agents_left: pp((a.name, a.prefs)); print("TEST 0")
@@ -392,10 +390,21 @@ def run():
     agents, alternatives = parse_data(sys.argv[1])
 
     if len(sys.argv) > 2:
-        comm_size = sys.argv[2]
+        comm_size = int(sys.argv[2])
 
     else:
         comm_size = len(alternatives)
+
+    # For testing    def __init__(self, wmgMap, count = 1):
+        self.wmgMap = wmgMap
+        self.count = count
+
+    print
+    print("agent.getIncEdgesMap()")
+    p
+    print("agent.getRankMap()")
+    print("agent.getReverseRankMap()")
+    print("agent.getOrderVector()")
 
     matchA = algoA(comm_size, alternatives, agents)
 
