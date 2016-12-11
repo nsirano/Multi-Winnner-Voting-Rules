@@ -252,7 +252,7 @@ def run():
     else:
         comm_size = len(alternatives)
 
-    matchA = algoA(4, alternatives, agents)
+    matchA = algoA(comm_size, alternatives, agents)
 
 # ============================================================================ #
 if __name__ == "__main__":
