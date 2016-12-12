@@ -407,16 +407,30 @@ def algoC_M(comm_size, alts, agents, d):
     return finalList
 
 def algoP_CC(comm_size, alts, agents):
+    '''
+    Approximation algorithm for Chamberlin-Courant multi-winner elections, as described
+    under Algorithm P (Chamberlin-Courant) in the paper 'Achieving fully proportional representation:
+    Approximability results' by Piotr Skowron, Piotr Faliszewski, Arkadii Slinko.
+    This algorithm takes in a desired committee size (comm_size), a list of candidate alternative ids (alts), and
+    a list of agent preferences (agents). The returned output is a final list of winning alternatives to serve on the committee.
+
+    Input:
+        comm_size - integer
+        alts - list of strings ([str])
+        agents - list of PrefPy Preference Objects ([Preference])
+
+    Output:
+        list of strings
+    '''
     # Calculate the bounding rank
     X = math.ceil(len(alts) * lambertw(comm_size)/comm_size)
-    print("algoP X: ", X)
 
     # Store Preference objects (agents) in SingleAssignment objects
     assignments = []
     for a in agents:
         assignments.append(SingleAssignment(a))
 
-    # Full Assignment
+    # Full Assignment storage object to keep track of unassigned alts
     fa = FullAssignment(assignments, alts)
     # List of alternatives that have already been assigned
     assignedAlts = []
@@ -428,24 +442,32 @@ def algoP_CC(comm_size, alts, agents):
         for a in assignments:
             if (a.alt =='<none>'):
                 unmatchedAgents.append(a.pref)
-
+		# Get the alternative that occurs in the top X positions of the most
+		# unassigned agent's rankings
         alt = getTopKAlt(fa.unmatchedAlts, unmatchedAgents, X)
-        print("algoP topKAlt: ", alt)
+		# Note the alternative is now being assigned
         assignedAlts.append(alt)
         fa.unmatchedAlts.remove(alt)
-        for a in assignments:
+		# Assign any unassigned agents who postion the alternative in
+		#  their top X rankings to that alternative
+        for a in unmatchedAgents:
             if (a.pref.getRankMap()[alt] <= X):
                 a.alt = alt
-
+	# Assign any remaining unassigned agents to their most preferred
+	#  alternatives of those selected to be on the committee
     for a in assignments:
         if (a.alt == '<none>'):
-            rankMap = a.pref.getRankMap()
             for alt in assignedAlts:
                 if (bordaScore(a.pref, alt) > a.getSatScore()):
                     a.alt = alt
 
-    return fa
-                    
+    # Convert to a simple list of alternatives
+    finalSet = {}
+    for sa in fa:
+        finalSet[sa.alt] = None
+    finalList = finalSet.keys()
+
+    return finalList
 
 
 
