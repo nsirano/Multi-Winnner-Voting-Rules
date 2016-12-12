@@ -5,7 +5,8 @@ Authors: Nick Sirano, James Hamren
 Date:    12/11/2016
 
 Description:
-
+    Multi-Winner approximation algorithms as described in 'Achieving fully
+    proportional representation: Approximability results.'
 
 Source:
     P. Skowron, P. Faliszewski, A. Slinko, 'Achieving fully proportional
@@ -19,118 +20,6 @@ import operator
 import sys
 
 from preference import Preference
-
-def bordaScore(pref, alt):
-    '''
-    Function that takes in a voting agent's preference ranking and a specific candidate
-    alternative's id and returns the borda score value of the agent for that alternative.
-
-    Input:
-        pref - PrefPy Preference Object
-        alt - string
-
-    Output:
-        integer
-    '''
-    # Get alternative rankings from Preference object
-    rankMap = pref.getRankMap()
-    # Return the Borda Score if the alternative is recognized
-    #  (Last ranking borda score of 1)
-    try:
-        rank = rankMap[alt]
-        score = (len(rankMap) - (rank-1))
-        return score
-    # Return 0 otherwise, allowing for truncated ballots
-    except KeyError:
-        return 0
-
-def getTopKAlt(alts, agents, K):
-    '''
-    Function that returns the id of one of the candidate alternative that appears in the
-    top K positions of the provided agent's rankings
-
-    Input:
-        alts - list of strings ([str])
-        agents - list of PrefPy Preference Objects ([Preference])
-        K - integer
-
-    Output:
-        string
-    '''
-    # Default topKAlt is the first alternative in the list, but has a topKScore of 0
-    #  until it is actually computed
-    topKAlt = alts[0]
-    topKAltScore = 0
-    tmpScore = 0
-
-    # Loop through alternatives, incrementing the score for every agent that
-    #  ranks them in one of the top K positions
-    for alt in alts:
-        for ag in agents:
-            if (ag.getRankMap()[alt] <= K):
-                tmpScore += 1
-        if (tmpScore > topKAltScore):
-            topKAlt = alt
-            topKAltScore = tmpScore
-        tmpScore = 0
-
-    # Returns the agent with the greatest topKScore (or one of them in case of a tie)
-    return topKAlt
-
-class SingleAssignment:
-    '''
-    Object that pairs the preference ranking of a voting agent with a candidate
-    alternative's identifier, the default of which is '<none>'.
-
-    Attributes:
-        self.pref - PrefPy Preference Object
-        self.alt - string
-    '''
-
-    def __init__(self, prefObj, altID='<none>'):
-        self.pref = prefObj
-        self.alt = altID
-
-    # Function that returns the satisfaction score of the agent
-    #  with their assigned alternative. Default scoring method
-    #  is Borda.
-    def getSatScore(self, scoreType='borda'):
-        scoreType = scoreType.lower()
-
-        if (scoreType == 'borda'):
-            return bordaScore(self.pref, self.alt)
-
-        else:
-            print('error: unknown scoring method')
-
-class FullAssignment:
-    '''
-    Object that pairs a list of SingleAssignments with a list of unmatched alternatives.
-    Initially, all alternatives will be unmatched, however, and any matched alternatives
-    should appear in the SingleAssignment list with the preference(s) they are matched with.
-
-    Attributes:
-        self.assignments = list of SingleAssignment Objects ([SingleAssignment])
-        self.unmatchedAlts = list of strings ([str])
-    '''
-
-    def __init__(self, assignmentObjList=[], unmatchedAltList=[]):
-        self.assignments = assignmentObjList
-        self.unmatchedAlts = unmatchedAltList
-
-    # Function that returns the total satisfaction score of all
-    #  assignments contained within. Default scoring method is Borda.
-    def getSatScore(self, scoreType='borda'):
-        scoreType = scoreType.lower()
-
-        if (scoreType == 'borda'):
-            totalScore = 0
-            for a in self.assignments:
-                totalScore += a.getSatScore(scoreType)
-            return totalScore
-
-        else:
-            print('error: unknown scoring method')
 
 def usage():
     """
@@ -199,6 +88,13 @@ def borda(alternative, ranking):
     """
     Returns the borda score of an alternative in a given ranking defined as a
     two-dimensional list of alternatives.
+
+    Input:
+        alternative - string
+        ranking     - 2-dimensional list of strings
+
+    Output:
+        integer
     """
     for tier in range(len(ranking)):
         if alternative in ranking[tier]:
@@ -206,16 +102,119 @@ def borda(alternative, ranking):
 
     return 0
 
-def algoA(comm_size, alts, agents):
+def getTopKAlt(alts, agents, K):
+    """
+    Function that returns the id of one of the candidate alternative that appears in the
+    top K positions of the provided agent's rankings
+
+    Input:
+        alts - list of strings ([str])
+        agents - list of PrefPy Preference Objects ([Preference])
+        K - integer
+
+    Output:
+        string
+    """
+    # Default topKAlt is the first alternative in the list, but has a topKScore of 0
+    #  until it is actually computed
+    topKAlt = alts[0]
+    topKAltScore = 0
+    tmpScore = 0
+
+    # Loop through alternatives, incrementing the score for every agent that
+    #  ranks them in one of the top K positions
+    for alt in alts:
+        for ag in agents:
+            if (ag.getRankMap()[alt] <= K):
+                tmpScore += 1
+        if (tmpScore > topKAltScore):
+            topKAlt = alt
+            topKAltScore = tmpScore
+        tmpScore = 0
+
+    # Returns the agent with the greatest topKScore (or one of them in case of a tie)
+    return topKAlt
+
+class SingleAssignment:
+    """
+    Object that pairs the preference ranking of a voting agent with a candidate
+    alternative's identifier, the default of which is '<none>'.
+
+    Attributes:
+        self.pref - PrefPy Preference Object
+        self.alt - string
+    """
+
+    def __init__(self, prefObj, altID="<none>"):
+        self.pref = prefObj
+        self.alt = altID
+
+    # Function that returns the satisfaction score of the agent
+    #  with their assigned alternative. Default scoring method
+    #  is Borda.
+    def getSatScore(self, scoreType="borda"):
+        scoreType = scoreType.lower()
+
+        if (scoreType == "borda"):
+            return borda(self.alt, self.pref.getOrderVector())
+
+        else:
+            print("Error: unknown scoring method.")
+            sys.exit(1)
+
+class FullAssignment:
+    """
+    Object that pairs a list of SingleAssignments with a list of unmatched alternatives.
+    Initially, all alternatives will be unmatched, however, and any matched alternatives
+    should appear in the SingleAssignment list with the preference(s) they are matched with.
+
+    Attributes:
+        self.assignments = list of SingleAssignment Objects ([SingleAssignment])
+        self.unmatchedAlts = list of strings ([str])
+    """
+
+    def __init__(self, assignmentObjList=[], unmatchedAltList=[]):
+        self.assignments = assignmentObjList
+        self.unmatchedAlts = unmatchedAltList
+
+    # Function that returns the total satisfaction score of all
+    #  assignments contained within. Default scoring method is Borda.
+    def getSatScore(self, scoreType="borda"):
+        scoreType = scoreType.lower()
+
+        if (scoreType == "borda"):
+            totalScore = 0
+            for a in self.assignments:
+                totalScore += a.getSatScore(scoreType)
+            return totalScore
+
+        else:
+            print("Error: Unknown scoring method.")
+            sys.exit(1)
+
+# Approximation Algorithms
+def algoA_M(comm_size, alts, agents):
     """
     Algorithm A as described on pages 76-77 of 'Achieving fully proportional
-    representation: Approximability results.'
+    representation: Approximability results' for the Monroe approximation
+    algorithm.
+
+    The solution is built iteratively. In each step, we pick some
+    not-yet-assigned alternative 'a' and assign it to those agents that are not
+    assigned to any other alternative yet, and whose satisfaction of being
+    matched with 'a' is maximal. Satisfiabiltiy is based on the Borda score of
+    each alternative for each agent.
+
+    Input:
+        comm_size - integer
+        alts      - list of strings ([str])
+        agents    - list of PrefPy Preference Objects ([Preference])
+        d         - integer
+
+    Output:
+        phi - list of strings
 
     """
-    if comm_size <= 2:
-        # Betzler
-        return
-
     num_assigned = len(agents)/comm_size
 
     alts_left = alts
@@ -270,7 +269,7 @@ def algoA(comm_size, alts, agents):
     return phi
 
 def algoC_CC(comm_size, alts, agents, d):
-    '''
+    """
     Approximation algorithm for Chamberlin-Courant multi-winner elections, as described
     under Algorithm C (Chamberlin-Courant) in the paper 'Achieving fully proportional
     representation: Approximability results' by Piotr Skowron, Piotr Faliszewski, Arkadii Slinko.
@@ -280,13 +279,13 @@ def algoC_CC(comm_size, alts, agents, d):
 
     Input:
         comm_size - integer
-        alts - list of strings ([str])
-        agents - list of PrefPy Preference Objects ([Preference])
-        d - integer
+        alts      - list of strings ([str])
+        agents    - list of PrefPy Preference Objects ([Preference])
+        d         - integer
 
     Output:
-        list of strings
-    '''
+        finalList - list of strings
+    """
 
     # Store Preference objects (agents) in SingleAssignment objects
     assignments = []
@@ -310,7 +309,7 @@ def algoC_CC(comm_size, alts, agents, d):
                 # Assign every agent to the current alternative if preferred
                 #  regardles of previous assignments
                 for a in extendedPA.assignments:
-                    if (bordaScore(a.pref, alt) > bordaScore(a.pref, a.alt)):
+                    if (borda(alt, a.pref.getOrderVector()) > borda(a.alt, a.pref.getOrderVector())):
                         a.alt = alt
                 # The alternative has now been matched, remove them from the
                 #  list of unmatched alternatives
@@ -334,7 +333,7 @@ def algoC_CC(comm_size, alts, agents, d):
     return finalList
 
 def algoC_M(comm_size, alts, agents, d):
-    '''
+    """
     Approximation algorithm for Monroe multi-winner elections, as described
     under Algorithm C (Monroe) in the paper 'Achieving fully proportional representation:
     Approximability results' by Piotr Skowron, Piotr Faliszewski, Arkadii Slinko.
@@ -344,13 +343,13 @@ def algoC_M(comm_size, alts, agents, d):
 
     Input:
         comm_size - integer
-        alts - list of strings ([str])
-        agents - list of PrefPy Preference Objects ([Preference])
-        d - integer
+        alts      - list of strings ([str])
+        agents    - list of PrefPy Preference Objects ([Preference])
+        d         - integer
 
     Output:
-        list of strings
-    '''
+        finalList - list of strings
+    """
     # Store the number of voting agents
     num_agents = len(agents)
 
@@ -407,7 +406,7 @@ def algoC_M(comm_size, alts, agents, d):
     return finalList
 
 def algoP_CC(comm_size, alts, agents):
-    '''
+    """
     Approximation algorithm for Chamberlin-Courant multi-winner elections, as described
     under Algorithm P (Chamberlin-Courant) in the paper 'Achieving fully proportional representation:
     Approximability results' by Piotr Skowron, Piotr Faliszewski, Arkadii Slinko.
@@ -421,7 +420,7 @@ def algoP_CC(comm_size, alts, agents):
 
     Output:
         list of strings
-    '''
+    """
     # Calculate the bounding rank
     X = math.ceil(len(alts) * lambertw(comm_size)/comm_size)
 
@@ -458,7 +457,7 @@ def algoP_CC(comm_size, alts, agents):
     for a in assignments:
         if (a.alt == '<none>'):
             for alt in assignedAlts:
-                if (bordaScore(a.pref, alt) > a.getSatScore()):
+                if (borda(alt, a.pref.getOrderVector()) > a.getSatScore()):
                     a.alt = alt
 
     # Convert to a simple list of alternatives
@@ -468,8 +467,6 @@ def algoP_CC(comm_size, alts, agents):
     finalList = finalSet.keys()
 
     return finalList
-
-
 
 def run():
     """
