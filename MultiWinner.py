@@ -140,7 +140,9 @@ def borda(alternative, ranking):
 
 def algoA(comm_size, alts, agents):
     """
-    Algorithm A
+    Algorithm A as described on pages 76-77 of 'Achieving fully proportional
+    representation: Approximability results.'
+    
     """
     if comm_size <= 2:
         # Betzler
