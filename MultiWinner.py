@@ -134,14 +134,10 @@ def algoA(comm_size, alts, agents):
         return
 
     num_assigned = len(agents)/comm_size
-    #print(num_assigned, "NUM_ASSIGNED")
 
     alts_left = alts
-    #print(alts_left, "ALTS_LEFT")
 
     current_agents = [a.getOrderVector() for a in agents]
-    #pp(current_agents)
-    #print
 
     phi = list()
 
@@ -150,12 +146,9 @@ def algoA(comm_size, alts, agents):
         score = dict()
         bests = dict()
 
-        #print(alts_left, "ALTS_LEFT")
-
         # For each alternative in each rank,
         alt_bests = []
         for alt in alts_left:
-            #print(alt, "ALT")
             def flat_rank(alt, order_vector):
                 '''
                 Compresses ranking into 1-dimensional vector and returns the
@@ -164,43 +157,31 @@ def algoA(comm_size, alts, agents):
                 yield (a for a in tier for tier in order_vector).index(alt)
 
             # Sort the agents by ranking of given alt, most preferred first
-            #print(current_agents, "AGENTS_LEFT")
             agents_left = list(sorted(current_agents,
                                       key=lambda agent:
                                         flat_rank(alt, agent)))
 
             # Add the first n/K agents to the best fit for the given alternative
             alt_bests = []
-            #print("len(agents_left) = " + str(len(agents_left)))
             for n in range(int(num_assigned)):
                 if agents_left:
                     alt_bests.append(agents_left.pop(0))
-                    #print(alt_bests[n]), "TEST 1"
-            #print(len(agents_left))
 
-            #pp(alt_bests)
             bests[alt] = list(alt_bests)
-            #pp(bests)
 
             # For each alternative relative to each agent,
             score[alt] = 0
             for j in alt_bests:
                 # Add the borda score
-                #score[alt] += len(alts) - j.index(alt)
                 score[alt] += borda(alt, j)
 
         best_alt = max(score.iteritems(), key=operator.itemgetter(1))[0]
-        #print(i, best_alt), "TEST 2"
-        #print(bests[best_alt]), "TEST 3"
         for j in bests[best_alt]:
-            #print(j, best_alt), "TEST 4"
             if best_alt not in phi:
                 phi.append(best_alt)
 
             current_agents.remove(j)
 
-        #print(i), "test 5"
-        #print(alts_left, best_alt), "test 6"
         alts_left.remove(best_alt)
 
     return phi
@@ -304,26 +285,10 @@ def run():
     else:
         comm_size = len(alternatives)
 
-    # For testing
+    winnersA = algoA(comm_size, alternatives, agents)
+    print(winnersA)
 
-    #print
-    #print("agent.getIncEdgesMap()")
-    #pp([a.getIncEdgesMap() for a in agents])
-    #print
-    #print("agent.getRankMap()")
-    #pp([a.getRankMap() for a in agents])
-    #print
-    #print("agent.getReverseRankMap()")
-    #pp([a.getReverseRankMap() for a in agents])
-    #print
-    #print("agent.getOrderVector()")
-    #pp([a.getOrderVector() for a in agents])
-    #print
-
-    winners = algoA(comm_size, alternatives, agents)
-    print(winners)
-
-
+    return winnersA
 
 # ============================================================================ #
 if __name__ == "__main__":
