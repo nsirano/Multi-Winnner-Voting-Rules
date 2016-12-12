@@ -1,12 +1,24 @@
+"""
+Project: Multi-Winner Voting Algorithms
+File:    MultiWinner.py
+Authors: Nick Sirano, James Hamren
+Date:    12/11/2016
+
+Description:
+
+
+Source:
+    P. Skowron, P. Faliszewski, A. Slinko, 'Achieving fully proportional
+    representation: Approximability results', Artificial Intelligence, Vol.222,
+    Pages 67-103
+"""
+
 import copy
 import math
 import operator
 import sys
 
 from preference import Preference
-
-import pprint
-pp = pprint.PrettyPrinter(indent=4).pprint
 
 def bordaScore(pref, alt):
     # Get alternative rankings from Preference object
@@ -56,7 +68,7 @@ def usage():
     """
     Prints usage information.
     """
-    print("python MultiWinner.py <data.txt> <comm_size>")
+    print("Usage: python MultiWinner.py <data.txt> <comm_size>")
 
 def check_arguments():
     """
@@ -69,7 +81,7 @@ def check_arguments():
 
 def sign(n):
     """
-    Checks the sign of a number.
+    Checks the sign of a number 'n'.
     Returns  1 if positive.
     Returns -1 if negative.
     """
@@ -82,6 +94,7 @@ def create_wmgMap(ranking):
     dictionary of candidates, excluding the first candidate. The second
     dictionary then maps to '1' if the first candidate is ranked higher than the
     second and maps to '-1' if the first candidate is ranked lower.
+    Returns wmgMap.
     """
     wmgMap = dict()
     alternatives = sorted(ranking)
@@ -150,10 +163,10 @@ def algoA(comm_size, alts, agents):
         alt_bests = []
         for alt in alts_left:
             def flat_rank(alt, order_vector):
-                '''
+                """
                 Compresses ranking into 1-dimensional vector and returns the
                 index of the alternative in the new vector.
-                '''
+                """
                 yield (a for a in tier for tier in order_vector).index(alt)
 
             # Sort the agents by ranking of given alt, most preferred first
