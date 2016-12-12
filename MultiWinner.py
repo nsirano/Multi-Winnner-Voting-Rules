@@ -21,6 +21,17 @@ import sys
 from preference import Preference
 
 def bordaScore(pref, alt):
+    '''
+    Function that takes in a voting agent's preference ranking and a specific candidate
+    alternative's id and returns the borda score value of the agent for that alternative.
+
+    Input:
+        pref - PrefPy Preference Object
+        alt - string
+
+    Output:
+        integer
+    '''
     # Get alternative rankings from Preference object
     rankMap = pref.getRankMap()
     # Return the Borda Score if the alternative is recognized
@@ -33,11 +44,56 @@ def bordaScore(pref, alt):
     except KeyError:
         return 0
 
+def getTopKAlt(alts, agents, K):
+    '''
+    Function that returns the id of one of the candidate alternative that appears in the
+    top K positions of the provided agent's rankings
+
+    Input:
+        alts - list of strings ([str])
+        agents - list of PrefPy Preference Objects ([Preference])
+        K - integer
+
+    Output:
+        string
+    '''
+    # Default topKAlt is the first alternative in the list, but has a topKScore of 0
+    #  until it is actually computed
+    topKAlt = alts[0]
+    topKAltScore = 0
+    tmpScore = 0
+
+    # Loop through alternatives, incrementing the score for every agent that
+    #  ranks them in one of the top K positions
+    for alt in alts:
+        for ag in agents:
+            if (ag.getRankMap()[alt] <= K):
+                tmpScore += 1
+        if (tmpScore > topKAltScore):
+            topKAlt = alt
+            topKAltScore = tmpScore
+        tmpScore = 0
+
+    # Returns the agent with the greatest topKScore (or one of them in case of a tie)
+    return topKAlt
+
 class SingleAssignment:
+    '''
+    Object that pairs the preference ranking of a voting agent with a candidate
+    alternative's identifier, the default of which is '<none>'.
+
+    Attributes:
+        self.pref - PrefPy Preference Object
+        self.alt - string
+    '''
+
     def __init__(self, prefObj, altID='<none>'):
         self.pref = prefObj
         self.alt = altID
 
+    # Function that returns the satisfaction score of the agent
+    #  with their assigned alternative. Default scoring method
+    #  is Borda.
     def getSatScore(self, scoreType='borda'):
         scoreType = scoreType.lower()
 
@@ -48,10 +104,22 @@ class SingleAssignment:
             print('error: unknown scoring method')
 
 class FullAssignment:
+    '''
+    Object that pairs a list of SingleAssignments with a list of unmatched alternatives.
+    Initially, all alternatives will be unmatched, however, and any matched alternatives
+    should appear in the SingleAssignment list with the preference(s) they are matched with.
+
+    Attributes:
+        self.assignments = list of SingleAssignment Objects ([SingleAssignment])
+        self.unmatchedAlts = list of strings ([str])
+    '''
+
     def __init__(self, assignmentObjList=[], unmatchedAltList=[]):
         self.assignments = assignmentObjList
         self.unmatchedAlts = unmatchedAltList
 
+    # Function that returns the total satisfaction score of all
+    #  assignments contained within. Default scoring method is Borda.
     def getSatScore(self, scoreType='borda'):
         scoreType = scoreType.lower()
 
@@ -142,7 +210,7 @@ def algoA(comm_size, alts, agents):
     """
     Algorithm A as described on pages 76-77 of 'Achieving fully proportional
     representation: Approximability results.'
-    
+
     """
     if comm_size <= 2:
         # Betzler
@@ -202,6 +270,24 @@ def algoA(comm_size, alts, agents):
     return phi
 
 def algoC_CC(comm_size, alts, agents, d):
+    '''
+    Approximation algorithm for Chamberlin-Courant multi-winner elections, as described
+    under Algorithm C (Chamberlin-Courant) in the paper 'Achieving fully proportional
+    representation: Approximability results' by Piotr Skowron, Piotr Faliszewski, Arkadii Slinko.
+    This algorithm takes in a desired committee size (comm_size), a list of candidate alternative ids (alts),
+    a list of agent preferences (agents), and a integer for the number of saved partial commitee assignments (d).
+    The returned output is a final list of winning alternatives to serve on the committee.
+
+    Input:
+        comm_size - integer
+        alts - list of strings ([str])
+        agents - list of PrefPy Preference Objects ([Preference])
+        d - integer
+
+    Output:
+        list of strings
+    '''
+
     # Store Preference objects (agents) in SingleAssignment objects
     assignments = []
     for a in agents:
@@ -215,6 +301,7 @@ def algoC_CC(comm_size, alts, agents, d):
 
     # Iteratively build up partial assignments by adding 1 alternative at a time
     for i in range(comm_size):
+        # Temporary list for storing test versions of partial assignments
         tmpList = []
         # Extend every partial assignment to include 1 more alternative, trying every permutation
         for pa in paList:
@@ -225,19 +312,45 @@ def algoC_CC(comm_size, alts, agents, d):
                 for a in extendedPA.assignments:
                     if (bordaScore(a.pref, alt) > bordaScore(a.pref, a.alt)):
                         a.alt = alt
-                # The alternative has now been matched
+                # The alternative has now been matched, remove them from the
+                #  list of unmatched alternatives
                 extendedPA.unmatchedAlts.remove(alt)
-                # Save the new extended partial assignment
+                # Store the new extended partial assignment
                 tmpList.append(extendedPA)
-        # Sort the partial assignments by total satisfaction score
+        # Sort the partial assignments by total satisfaction score provided
         tmpList = sorted(tmpList, key=lambda pa: pa.getSatScore(), reverse=True)
-        # Keep the top L partial assignments for use in the next iteration
+        # Keep only the top L partial assignments for use in the next iteration
         L = min(len(tmpList), d)
         paList = tmpList[:L]
 
-    return paList
+    # Select the full assignment that provides the greatest total satisfaction
+    finalAssignment = paList[0]
+    # Convert to a simple list of alternatives and return
+    finalSet = {}
+    for sa in finalAssignment:
+        finalSet[sa.alt] = None
+    finalList = finalSet.keys()
+
+    return finalList
 
 def algoC_M(comm_size, alts, agents, d):
+    '''
+    Approximation algorithm for Monroe multi-winner elections, as described
+    under Algorithm C (Monroe) in the paper 'Achieving fully proportional representation:
+    Approximability results' by Piotr Skowron, Piotr Faliszewski, Arkadii Slinko.
+    This algorithm takes in a desired committee size (comm_size), a list of candidate alternative ids (alts),
+    a list of agent preferences (agents), and a integer for the number of saved partial commitee assignments (d).
+    The returned output is a final list of winning alternatives to serve on the committee.
+
+    Input:
+        comm_size - integer
+        alts - list of strings ([str])
+        agents - list of PrefPy Preference Objects ([Preference])
+        d - integer
+
+    Output:
+        list of strings
+    '''
     # Store the number of voting agents
     num_agents = len(agents)
 
@@ -283,7 +396,57 @@ def algoC_M(comm_size, alts, agents, d):
         L = min(len(tmpList), d)
         paList = tmpList[:L]
 
-    return paList
+    # Select the full assignment that provides the greatest total satisfaction
+    finalAssignment = paList[0]
+    # Convert to a simple list of alternatives
+    finalSet = {}
+    for sa in finalAssignment:
+        finalSet[sa.alt] = None
+    finalList = finalSet.keys()
+
+    return finalList
+
+def algoP_CC(comm_size, alts, agents):
+    # Calculate the bounding rank
+    X = math.ceil(len(alts) * lambertw(comm_size)/comm_size)
+    print("algoP X: ", X)
+
+    # Store Preference objects (agents) in SingleAssignment objects
+    assignments = []
+    for a in agents:
+        assignments.append(SingleAssignment(a))
+
+    # Full Assignment
+    fa = FullAssignment(assignments, alts)
+    # List of alternatives that have already been assigned
+    assignedAlts = []
+
+    # For each committee position
+    for i in range(comm_size):
+        # Collect a list of unassigned agents
+        unmatchedAgents = []
+        for a in assignments:
+            if (a.alt =='<none>'):
+                unmatchedAgents.append(a.pref)
+
+        alt = getTopKAlt(fa.unmatchedAlts, unmatchedAgents, X)
+        print("algoP topKAlt: ", alt)
+        assignedAlts.append(alt)
+        fa.unmatchedAlts.remove(alt)
+        for a in assignments:
+            if (a.pref.getRankMap()[alt] <= X):
+                a.alt = alt
+
+    for a in assignments:
+        if (a.alt == '<none>'):
+            rankMap = a.pref.getRankMap()
+            for alt in assignedAlts:
+                if (bordaScore(a.pref, alt) > a.getSatScore()):
+                    a.alt = alt
+
+    return fa
+                    
+
 
 
 def run():
