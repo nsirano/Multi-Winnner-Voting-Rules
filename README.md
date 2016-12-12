@@ -3,6 +3,10 @@
 ### Description
 Multi-Winner approximation algorithms as described in 'Achieving fully proportional representation: Approximability results.'
 
+### Requirements
+[PrefPy](https://github.com/PrefPy/prefpy)
+[SciPy](https://www.scipy.org/)
+
 #### Approximation algorithms
 - Monroe Algorithm
 - Chamberlin-Courant Algorithm
