@@ -53,6 +53,9 @@ def create_wmgMap(ranking):
     dictionary then maps to '1' if the first candidate is ranked higher than the
     second and maps to '-1' if the first candidate is ranked lower.
     Returns wmgMap.
+
+    Input:
+        ranking - 1 dimensional list of preferences
     """
     wmgMap = dict()
     alternatives = sorted(ranking)
@@ -109,9 +112,9 @@ def getTopKAlt(alts, agents, K):
     top K positions of the provided agent's rankings
 
     Input:
-        alts - list of strings ([str])
+        alts   - list of strings ([str])
         agents - list of PrefPy Preference Objects ([Preference])
-        K - integer
+        K      - integer
 
     Output:
         string
@@ -143,7 +146,7 @@ class SingleAssignment:
 
     Attributes:
         self.pref - PrefPy Preference Object
-        self.alt - string
+        self.alt  - string
     """
 
     def __init__(self, prefObj, altID="<none>"):
