@@ -1,7 +1,7 @@
 """
 Project: Multi-Winner Voting Algorithms
 File:    MultiWinner.py
-Authors: Nick Sirano, James Hamren
+Authors: Nick Sirano, Parker Hamren
 Date:    12/11/2016
 
 Description:
