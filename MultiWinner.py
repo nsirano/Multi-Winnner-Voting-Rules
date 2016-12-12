@@ -87,30 +87,6 @@ def create_wmgMap(ranking):
     alternatives = sorted(ranking)
 
     # For each alternative as the first candidate,
-    for a in range(len(alternatives)):
-        wmgMap[a] = dict()
-
-        # For each alternative that is not the first candidate
-        for alt in range(len(alternatives)):
-            if alt != a:
-                alt_index = ranking.index(alternatives[alt])
-                a_index   = ranking.index(alternatives[a])
-                wmgMap[a][alt] = sign(alt_index - a_index)
-
-    return wmgMap
-
-def create_wmgMap2(ranking):
-    """
-    Create a weighted majority graph mapping from a voter's preference rankings.
-    Each wmgMap is a dictionary of candidates that each maps to another
-    dictionary of candidates, excluding the first candidate. The second
-    dictionary then maps to '1' if the first candidate is ranked higher than the
-    second and maps to '-1' if the first candidate is ranked lower.
-    """
-    wmgMap = dict()
-    alternatives = sorted(ranking) # ?: I don't think this is necessary that they are in alphbetical order?
-
-    # For each alternative as the first candidate,
     for a in alternatives:
         wmgMap[a] = dict()
 
@@ -130,13 +106,13 @@ def parse_data(filename, agents=[], alternatives=[]):
     f = open(sys.argv[1], "r")
     for line in f:
         ranking = line.rstrip().split(',')
+        print(ranking)
         if len(ranking) > len(alternatives):
             alternatives = sorted(ranking)
 
-        wmgMap = create_wmgMap(ranking)
+        wmgMap = create_wmgMap2(ranking)
         agents.append(Preference(wmgMap))
 
-    pp(wmgMap)
     return agents, alternatives
 
 def algoA(comm_size, alts, agents):
@@ -150,8 +126,10 @@ def algoA(comm_size, alts, agents):
     num_assigned = len(agents)/comm_size
     print(num_assigned, "num_assigned")
 
-    alts_left = list(alts)
-    agents_left = (a.getOrderVector() for a in agents)
+    alts_left = range(len(alts))
+    agents_left = [a.getOrderVector() for a in agents]
+
+    pp(agents_left)
 
     phi = dict()
 
@@ -160,22 +138,21 @@ def algoA(comm_size, alts, agents):
         score = dict()
         bests = dict()
 
+        print(alts_left)
+
         # For each alternative,
         alt_bests = []
         for alt in alts_left:
             # Sort the agents by ranking of given alt, most preferred first
             agents_left = list(sorted(agents_left, key=lambda agent:
-                                                        agent.index(alt)))
-
-            print
-            for a in agents_left: pp((a.name, a.prefs)); print("TEST 0")
+                                                        agent.index([alt])))
 
             # Add the first n/K agents to the best fit for the given alternative
             alt_bests = []
             for n in range(int(num_assigned)):
                 if agents_left:
                     alt_bests.append(agents_left.pop(0))
-                    print(alt_bests[n].name), "TEST 1"
+                    print(alt_bests[n]), "TEST 1"
 
             pp(alt_bests)
             print(alt, "ALT")
@@ -186,15 +163,15 @@ def algoA(comm_size, alts, agents):
             score[alt] = 0
             for j in alt_bests:
                 # Add the borda score
-                score[alt] += len(alts) - j.prefs.index(alt)
+                score[alt] += len(alts) - j.index([alt])
 
 
         best_alt = max(score.iteritems(), key=operator.itemgetter(1))[0]
         print(i, best_alt), "TEST 2"
         print(bests[best_alt]), "TEST 3"
         for j in bests[best_alt]:
-            print(j.name, best_alt), "TEST 4"
-            phi[j.name] = best_alt
+            print(j, best_alt), "TEST 4"
+            phi[[j]] = best_alt
 
         print(i), "test 5"
         print(alts_left, best_alt), "test 6"
@@ -395,14 +372,20 @@ def run():
     else:
         comm_size = len(alternatives)
 
-    # For testing 
+    # For testing
 
     print
     print("agent.getIncEdgesMap()")
-    p
+    pp([a.getIncEdgesMap() for a in agents])
+    print
     print("agent.getRankMap()")
+    pp([a.getRankMap() for a in agents])
+    print
     print("agent.getReverseRankMap()")
+    pp([a.getReverseRankMap() for a in agents])
+    print
     print("agent.getOrderVector()")
+    pp([a.getOrderVector() for a in agents])
 
     matchA = algoA(comm_size, alternatives, agents)
 
