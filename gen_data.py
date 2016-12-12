@@ -5,7 +5,7 @@ def usage():
     """
     Prints usage notes for the program.
     """
-    print("Usage: python3 gen_data.py <num_choices> <num_voters>")
+    print("Usage: python gen_data.py <num_choices> <num_voters>")
 
 def arg_check():
     """
