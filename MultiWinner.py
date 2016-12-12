@@ -110,10 +110,21 @@ def parse_data(filename, agents=[], alternatives=[]):
         if len(ranking) > len(alternatives):
             alternatives = sorted(ranking)
 
-        wmgMap = create_wmgMap2(ranking)
+        wmgMap = create_wmgMap(ranking)
         agents.append(Preference(wmgMap))
 
     return agents, alternatives
+
+def borda(alternative, ranking):
+    """
+    Returns the borda score of an alternative in a given ranking defined as a
+    two-dimensional list of alternatives.
+    """
+
+
+    for tier in range(len(ranking)):
+        if alternative in ranking[tier]:
+            return tier
 
 def algoA(comm_size, alts, agents):
     """
@@ -124,38 +135,52 @@ def algoA(comm_size, alts, agents):
         return
 
     num_assigned = len(agents)/comm_size
-    print(num_assigned, "num_assigned")
+    print(num_assigned, "NUM_ASSIGNED")
 
-    alts_left = range(len(alts))
-    agents_left = [a.getOrderVector() for a in agents]
+    alts_left = alts
+    print(alts_left, "ALTS_LEFT")
 
-    pp(agents_left)
+    current_agents = [a.getOrderVector() for a in agents]
+    pp(current_agents)
 
-    phi = dict()
+    print
+
+    phi = list()
 
     # For each committee member
     for i in range(1, comm_size + 1):
         score = dict()
         bests = dict()
 
-        print(alts_left)
+        print(alts_left, "ALTS_LEFT")
 
-        # For each alternative,
+        # For each alternative in each rank,
         alt_bests = []
         for alt in alts_left:
+            print(alt, "ALT")
+            def flat_rank(alt, order_vector):
+                '''
+                Compresses ranking into 1-dimensional vector and returns the
+                index of the alternative in the new vector.
+                '''
+                yield (a for a in tier for tier in order_vector).index(alt)
+
             # Sort the agents by ranking of given alt, most preferred first
-            agents_left = list(sorted(agents_left, key=lambda agent:
-                                                        agent.index([alt])))
+            print(current_agents, "AGENTS_LEFT")
+            agents_left = list(sorted(current_agents,
+                                      key=lambda agent:
+                                        flat_rank(alt, agent)))
 
             # Add the first n/K agents to the best fit for the given alternative
             alt_bests = []
+            print("len(agents_left) = " + str(len(agents_left)))
             for n in range(int(num_assigned)):
                 if agents_left:
                     alt_bests.append(agents_left.pop(0))
                     print(alt_bests[n]), "TEST 1"
+            print(len(agents_left))
 
             pp(alt_bests)
-            print(alt, "ALT")
             bests[alt] = list(alt_bests)
             pp(bests)
 
@@ -163,15 +188,18 @@ def algoA(comm_size, alts, agents):
             score[alt] = 0
             for j in alt_bests:
                 # Add the borda score
-                score[alt] += len(alts) - j.index([alt])
-
+                #score[alt] += len(alts) - j.index(alt)
+                score[alt] += borda(alt, j)
 
         best_alt = max(score.iteritems(), key=operator.itemgetter(1))[0]
         print(i, best_alt), "TEST 2"
         print(bests[best_alt]), "TEST 3"
         for j in bests[best_alt]:
             print(j, best_alt), "TEST 4"
-            phi[[j]] = best_alt
+            if best_alt not in phi:
+                phi.append(best_alt)
+                
+            current_agents.remove(j)
 
         print(i), "test 5"
         print(alts_left, best_alt), "test 6"
@@ -386,8 +414,12 @@ def run():
     print
     print("agent.getOrderVector()")
     pp([a.getOrderVector() for a in agents])
+    print
 
-    matchA = algoA(comm_size, alternatives, agents)
+    winners = algoA(comm_size, alternatives, agents)
+    print(winners)
+
+
 
 # ============================================================================ #
 if __name__ == "__main__":
