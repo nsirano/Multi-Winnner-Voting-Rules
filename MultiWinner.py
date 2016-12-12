@@ -207,50 +207,7 @@ def algoA(comm_size, alts, agents):
 
     return phi
 
-def algoC_CC(K, alts, agents, d):
-    """
-	Chamberlin Courant Multi-Winner Approximation Algorithm C:
-
-    Algorithm C is a further heuristic improvement over Algorithm B. This time
-    the idea is that instead of keeping only one partial function 'phi' that is
-    iteratively extended up to the full assignment, we keep a list of up to d
-    partial assignment functions, where 'd' is a parameter of the algorithm. At
-    each iteration, for each assignment function 'phi' among the 'd' stored ones
-    and for each alternative a to which 'phi' has not assigned agents yet, we
-    compute an optimal extension of this 'phi' that assigns agents to 'a'. As a
-    result we obtain possibly more than 'd' (partial) assignment functions. For
-    the next iteration we keep those d that give highest satisfaction.
-	"""
-	# list of partial assignments
-    Par = []
-	# initial assignment function
-    af0 = AssignmentFunction(agents, alts)
-    Par.append(af0)
-	# Build the partial assignments up, iteratively adding 1 candidate at a time
-    for i in range(K):
-		# create a new partial assignment list for testing
-        newPar = []
-		# for each of the saved partial assignments in list Par
-        for af in Par:
-			# attempt to place every alternative in committee seat 'i' for current partial assignment
-            for alt in af.unmatchedAlts:
-                af_prime = copy.deepcopy(af) # this should be a deep copy
-                af_prime.unmatchedAlts.remove(alt)
-				# assign every agent that prefers this alterative as their assigned alternative
-				#   regardless of whether or not they have been previously assigned
-                for agent in af_prime.agents:
-                    if (bordaSat(agent.prefs, alt) > bordaSat(agent.prefs, agent.alt)):
-                        agent.alt = alt
-                newPar.append(af_prime)
-			# Sort list of partial assignments by total borda satisfaction
-            newPar.sort(key=bordaTotalSat, reverse=True)
-        # Keep only the top 'd' partial assignments for use in the next iteration
-        L = min(len(newPar), d)
-        Par = newPar[:L]
-
-    return Par
-
-def algoC_CC2(comm_size, alts, agents, d):
+def algoC_CC(comm_size, alts, agents, d):
     # Store Preference objects (agents) in SingleAssignment objects
     assignments = []
     for a in agents:
@@ -272,7 +229,7 @@ def algoC_CC2(comm_size, alts, agents, d):
                 # Assign every agent to the current alternative if preferred
                 #  regardles of previous assignments
                 for a in extendedPA.assignments:
-                    if (bordaSat(a.pref, alt) > bordaSat(a.pref, a.alt)):
+                    if (bordaScore(a.pref, alt) > bordaScore(a.pref, a.alt)):
                         a.alt = alt
                 # The alternative has now been matched
                 extendedPA.unmatchedAlts.remove(alt)
@@ -286,58 +243,7 @@ def algoC_CC2(comm_size, alts, agents, d):
 
     return paList
 
-
-def algoC_M(K, N, alts, agents, d):
-    """
-	Monroe Multi-Winner Approximation Algorithm C:
-
-	Algorithm C is a further heuristic improvement over Algorithm B. This time
-    the idea is that instead of keeping only one partial function 'phi' that is
-    iteratively extended up to the full assignment, we keep a list of up to 'd'
-    partial assignment functions, where 'd' is a parameter of the algorithm. At
-    each iteration, for each assignment function 'phi' among the 'd' stored ones
-    and for each alternative a to which 'phi' has not assigned agents yet, we
-    compute an optimal extension of this 'phi' that assigns agents to 'a'. As a
-    result we obtain possibly more than 'd' (partial) assignment functions. For
-    the next iteration we keep those 'd' that give highest satisfaction.
-    """
-	# list of partial assignments
-    Par = []
-	# initial assignment function
-    af0 = AssignmentFunction(agents, alts)
-    Par.append(af0)
-	# Build the partial assignments up, iteratively adding 1 candidate at a time
-    for i in range(K):
-		# Create a new partial assignment list for testing
-        newPar = []
-		# for each of the saved partial assignments in list Par
-        for af in Par:
-			# attempt to place every alternative in committee seat 'i' for current partial assignment
-            for alt in af.unmatchedAlts:
-                af_prime = copy.deepcopy(af) # this should be a deep copy
-                af_prime.unmatchedAlts.remove(alt)
-				# sort agents by the preference for the candidate alternative currently being considered
-                sortedAgentsByPref = agentSort(af_prime.agents, alt)
-                #print('sortedAgentsByPref=', len(sortedAgentsByPref))
-                af_prime.agents = sortedAgentsByPref
-				# assign only N/K agents to the current candidate alternative
-                counter = 0
-                for a in af_prime.agents:
-                    if (a.alt == 'none'):
-                        a.alt = alt
-                        counter += 1
-                    if (counter == math.ceil(N / K)):
-                        break
-				# store the current test partial assignment
-                newPar.append(af_prime)
-			# Sort the test partial assignments by their total Borda satisfaction
-            newPar.sort(key=bordaTotalSat, reverse=True)
-		# Keep only the top 'd' partial assignments for use in the next iteration
-        L = min(len(newPar), d)
-        Par = newPar[:L]
-    return Par
-
-def algoC_M2(comm_size, alts, agents, d):
+def algoC_M(comm_size, alts, agents, d):
     # Store the number of voting agents
     num_agents = len(agents)
 
@@ -384,7 +290,7 @@ def algoC_M2(comm_size, alts, agents, d):
         paList = tmpList[:L]
 
     return paList
-
+    
 
 def run():
     """
