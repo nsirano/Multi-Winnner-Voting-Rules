@@ -19,6 +19,7 @@ import math
 import operator
 import sys
 
+from scipy.special import lambertw
 from preference import Preference
 
 def usage():
@@ -326,7 +327,7 @@ def algoC_CC(comm_size, alts, agents, d):
     finalAssignment = paList[0]
     # Convert to a simple list of alternatives and return
     finalSet = {}
-    for sa in finalAssignment:
+    for sa in finalAssignment.assignments:
         finalSet[sa.alt] = None
     finalList = finalSet.keys()
 
@@ -399,7 +400,7 @@ def algoC_M(comm_size, alts, agents, d):
     finalAssignment = paList[0]
     # Convert to a simple list of alternatives
     finalSet = {}
-    for sa in finalAssignment:
+    for sa in finalAssignment.assignments:
         finalSet[sa.alt] = None
     finalList = finalSet.keys()
 
@@ -462,7 +463,7 @@ def algoP_CC(comm_size, alts, agents):
 
     # Convert to a simple list of alternatives
     finalSet = {}
-    for sa in fa:
+    for sa in fa.assignments:
         finalSet[sa.alt] = None
     finalList = finalSet.keys()
 
@@ -485,7 +486,8 @@ def run():
     winnersA = algoA(comm_size, alternatives, agents)
     print(winnersA)
 
-    return winnersA
+    winners = winnersA
+    return winners
 
 # ============================================================================ #
 if __name__ == "__main__":
