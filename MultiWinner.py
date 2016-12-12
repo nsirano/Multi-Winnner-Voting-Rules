@@ -451,7 +451,7 @@ def algoP_CC(comm_size, alts, agents):
 		# Assign any unassigned agents who postion the alternative in
 		#  their top X rankings to that alternative
         for a in unmatchedAgents:
-            if (a.pref.getRankMap()[alt] <= X):
+            if (a.getRankMap()[alt] <= X):
                 a.alt = alt
 	# Assign any remaining unassigned agents to their most preferred
 	#  alternatives of those selected to be on the committee
