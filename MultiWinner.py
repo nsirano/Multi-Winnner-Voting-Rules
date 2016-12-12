@@ -483,7 +483,7 @@ def run():
     else:
         comm_size = len(alternatives)
 
-    winnersA = algoA(comm_size, alternatives, agents)
+    winnersA = algoA_M(comm_size, alternatives, agents)
     print(winnersA)
 
     winners = winnersA
